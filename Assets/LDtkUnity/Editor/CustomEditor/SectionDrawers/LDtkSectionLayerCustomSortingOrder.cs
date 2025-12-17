@@ -61,7 +61,7 @@ namespace LDtkUnity.Editor
 
         protected override void SetDefaultElementValue(SerializedProperty insertedValueProp, int i)
         {
-            insertedValueProp.intValue = i * -100;
+            insertedValueProp.intValue = -i;
         }
     }
 }
