@@ -1,4 +1,5 @@
-﻿using UnityEngine;
+﻿using System.Collections.Generic;
+using UnityEngine;
 
 namespace LDtkUnity.Editor
 {
@@ -102,8 +103,8 @@ namespace LDtkUnity.Editor
             AddIidComponent();
             LDtkProfiler.EndSample();
 
-            LDtkProfiler.BeginSample("new LDtkSortingOrder");
-            _sortingOrder = new LDtkSortingOrder();
+            LDtkProfiler.BeginSample("LDtkSortingOrder");
+            CreateSortingOrder();
             LDtkProfiler.EndSample();
             
             LDtkProfiler.BeginSample("BuildLayerInstances");
@@ -129,6 +130,24 @@ namespace LDtkUnity.Editor
             LDtkProfiler.BeginSample("PopulateLevelComponent");
             PopulateLevelComponent();
             LDtkProfiler.EndSample();
+        }
+
+        private void CreateSortingOrder()
+        {
+            var orders = _project.LayerCustomSortingOrders;
+
+            if (!_project.UseLayerCustomSortingOrders || orders.IsNullOrEmpty())
+            {
+                _sortingOrder = new LDtkSortingOrder();
+                return;
+            }
+
+            var sortingOrders = new Dictionary<string, int>(orders.Length);
+            foreach (LDtkLayerCustomSortingOrder order in orders)
+            {
+                sortingOrders.Add(order._ldtkLayerName, order._ldtkLayerOrder);
+            }
+            _sortingOrder = new LDtkSortingOrder(sortingOrders);
         }
 
         private void BuildFields()
