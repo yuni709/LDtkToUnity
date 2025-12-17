@@ -38,9 +38,9 @@ namespace LDtkUnity.Editor
         public const string ENUM_GENERATE = nameof(_enumGenerate);
         public const string ENUM_PATH = nameof(_enumPath);
         public const string ENUM_NAMESPACE = nameof(_enumNamespace);
-        public const string CUSTOM_SORTING_ORDERS = nameof(_customSortingOrders);
-        public const string LAYER_SORTING_ORDERS = nameof(_layerSortingOrders); 
         
+        public const string USE_LAYER_SORTING_ORDERS = nameof(_useLayerCustomSortingOrders); 
+        public const string LAYER_SORTING_ORDERS = nameof(_layerCustomSortingOrders); 
         
         /// <summary>
         /// This is cached into the meta file upon an import. Could be null if the import was a failure. Invisible to the inspector.
@@ -65,15 +65,8 @@ namespace LDtkUnity.Editor
         [SerializeField] private string _enumPath = null;
         [SerializeField] private string _enumNamespace = string.Empty;
 
-        [SerializeField] private bool _customSortingOrders = false;
-        
-        [Serializable]
-        public struct LayerSortingOrder
-        {
-            public string Layer;
-            public int Order;
-        }
-        [SerializeField] private LayerSortingOrder[] _layerSortingOrders = Array.Empty<LayerSortingOrder>(); 
+        [SerializeField] private bool _useLayerCustomSortingOrders = false;
+        [SerializeField] private LDtkLayerCustomSortingOrder[] _layerCustomSortingOrders = Array.Empty<LDtkLayerCustomSortingOrder>(); 
 
         
         public LDtkProjectFile JsonFile => _jsonFile;
@@ -86,8 +79,8 @@ namespace LDtkUnity.Editor
         public bool CreateLevelBoundsTrigger => _createLevelBoundsTrigger;
         public bool UseParallax => _useParallax;
         public bool ScaleEntities => _scaleEntities;
-        public bool CustomSortingOrders => _customSortingOrders;
-        public LayerSortingOrder[] LayerSortingOrders => _customSortingOrders ? _layerSortingOrders : Array.Empty<LayerSortingOrder>(); 
+        public bool UseLayerCustomSortingOrders => _useLayerCustomSortingOrders;
+        public LDtkLayerCustomSortingOrder[] LayerCustomSortingOrders => _layerCustomSortingOrders;
 
         //all of these are wiped after the entire import is done
         private LDtkArtifactAssets _artifacts;
