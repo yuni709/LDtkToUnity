@@ -1,3 +1,10 @@
+# [6.12.0](https://github.com/Cammin/LDtkToUnity/compare/6.11.5...6.12.0) (2025-12-17)
+
+
+### Features
+
+* Added layer sorting option ([6e96315](https://github.com/Cammin/LDtkToUnity/commit/6e963156aa75115e0c1df488ea1924dcdd9fdfcc))
+
 ## [6.11.5](https://github.com/Cammin/LDtkToUnity/compare/6.11.4...6.11.5) (2025-12-09)
 
 
