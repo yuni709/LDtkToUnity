@@ -1,3 +1,10 @@
+## [6.12.1](https://github.com/Cammin/LDtkToUnity/compare/6.12.0...6.12.1) (2026-01-25)
+
+
+### Bug Fixes
+
+* Fixed a compile error in unity versions 2020 and before ([a12ebb4](https://github.com/Cammin/LDtkToUnity/commit/a12ebb44a513dc7a20bd3b3517b6c90c41dcf2e6))
+
 # [6.12.0](https://github.com/Cammin/LDtkToUnity/compare/6.11.5...6.12.0) (2025-12-17)
 
 
