@@ -10,16 +10,11 @@ namespace LDtkUnity.Editor
     {
         public int SortingOrderValue { get; private set; } = 0;
         private readonly Dictionary<string, int> _layerNameOverrides;
-        private readonly HashSet<string> _layerNameOccurrences;
+        private readonly HashSet<string> _layerNameOccurrences = new HashSet<string>();
 
         public LDtkSortingOrder(Dictionary<string, int> layerNameOverrides = null)
         {
             _layerNameOverrides = layerNameOverrides;
-
-            if (layerNameOverrides != null)
-            {
-                _layerNameOccurrences = new HashSet<string>(layerNameOverrides.Count);
-            }
         }
         
         public void Next(string layerIdentifier = null)
@@ -27,7 +22,7 @@ namespace LDtkUnity.Editor
             //note: this supports repeated layer occurrences, even if that never happens.
             
             //Jump to the custom order if we get the first occurrence of a layer
-            if (layerIdentifier != null && _layerNameOccurrences != null && _layerNameOccurrences.Add(layerIdentifier))
+            if (layerIdentifier != null && _layerNameOccurrences.Add(layerIdentifier))
             {
                 if (_layerNameOverrides != null && _layerNameOverrides.TryGetValue(layerIdentifier, out int order))
                 {
