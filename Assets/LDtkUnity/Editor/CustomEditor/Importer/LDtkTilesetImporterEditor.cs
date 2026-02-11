@@ -16,6 +16,8 @@ namespace LDtkUnity.Editor
         
         private SerializedProperty _ppuProp;
         private SerializedProperty _overrideTextureProp;
+        private SerializedProperty _defaultSpriteAlignmentProp;
+        private SerializedProperty _defaultSpritePivotProp;
         private LDtkTilesetDefinitionWrapper _tilesetDef;
         
         private static readonly GUIContent PpuContent = new GUIContent
@@ -30,12 +32,24 @@ namespace LDtkUnity.Editor
                       "Note: You can only choose textures that scale up equally to the original, like 1x, 2x, 3x, etc.\n" +
                       "You do NOT need to change the pixels per unit when using an override texture.",
         };
+        private static readonly GUIContent DefaultSpriteAlignmentContent = new GUIContent
+        {
+            text = "Default Tile Alignment",
+            tooltip = "Default alignment used for imported tileset sprites.",
+        };
+        private static readonly GUIContent DefaultSpritePivotContent = new GUIContent
+        {
+            text = "Default Tile Pivot",
+            tooltip = "Default pivot used when Alignment is set to Custom. Value is normalized (0 to 1).",
+        };
         
         public override void OnEnable()
         {
             base.OnEnable();
             _ppuProp = serializedObject.FindProperty(LDtkTilesetImporter.PIXELS_PER_UNIT);
             _overrideTextureProp = serializedObject.FindProperty(LDtkTilesetImporter.OVERRIDE_TEXTURE);
+            _defaultSpriteAlignmentProp = serializedObject.FindProperty(LDtkTilesetImporter.DEFAULT_SPRITE_ALIGNMENT);
+            _defaultSpritePivotProp = serializedObject.FindProperty(LDtkTilesetImporter.DEFAULT_SPRITE_PIVOT);
             CacheImporter();
             
             if (_importer == null || _importer.IsBackupFile())
@@ -77,6 +91,7 @@ namespace LDtkUnity.Editor
             {
                 DrawPpu();
                 DrawRedirect();
+                DrawDefaultPivotSettings();
                 DrawDependenciesProperty();
                 serializedObject.ApplyModifiedProperties();
                 ApplyRevertGUI();
@@ -92,6 +107,7 @@ namespace LDtkUnity.Editor
                 TryDrawProjectReferenceButton();
                 DrawPpu();
                 DrawRedirect();
+                DrawDefaultPivotSettings();
                 
                 if (_projectImporter)
                 {
@@ -200,6 +216,24 @@ namespace LDtkUnity.Editor
             }
             
             EditorGUILayout.HelpBox("The resolution of the override texture must be a multiple of the original texture.", MessageType.Error, true);
+        }
+        
+        private void DrawDefaultPivotSettings()
+        {
+            EditorGUILayout.PropertyField(_defaultSpriteAlignmentProp, DefaultSpriteAlignmentContent);
+            SpriteAlignment alignment = (SpriteAlignment)_defaultSpriteAlignmentProp.intValue;
+            if (alignment == SpriteAlignment.Custom)
+            {
+                EditorGUILayout.PropertyField(_defaultSpritePivotProp, DefaultSpritePivotContent);
+                Vector2 pivot = _defaultSpritePivotProp.vector2Value;
+                pivot.x = Mathf.Clamp01(pivot.x);
+                pivot.y = Mathf.Clamp01(pivot.y);
+                _defaultSpritePivotProp.vector2Value = pivot;
+                return;
+            }
+
+            Vector2 pivotFromAlignment = LDtkSpriteRect.GetPivotValue(alignment, Vector2.zero);
+            EditorGUILayout.HelpBox($"Resolved Pivot: ({pivotFromAlignment.x:0.###}, {pivotFromAlignment.y:0.###})", MessageType.None, false);
         }
     }
 }

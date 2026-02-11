@@ -139,6 +139,8 @@ namespace LDtkUnity.Editor
                 _sprites = new List<LDtkSpriteRect>(jsonTileCount);
             }
             
+            changed |= ApplyDefaultSpriteSettingsToGeneratedSprites();
+            
             // trim metas off the end of the list to match the new src count.
             // LDtk handles this in the exact same way where if the tile count decreased, then any old tiles are complete
             if (_sprites.Count > jsonTileCount)
@@ -152,15 +154,7 @@ namespace LDtkUnity.Editor
             {
                 for (int tileId = _sprites.Count; tileId < jsonTileCount; tileId++)
                 {
-                    LDtkSpriteRect newRect = new LDtkSpriteRect
-                    {
-                        border = Vector4.zero,
-                        pivot = new Vector2(0.5f, 0.5f),
-                        alignment = SpriteAlignment.Center,
-                        rect = srcRects[tileId].UnityRect,
-                        spriteID = GUID.Generate(),
-                        name = $"{_definition.Def.Identifier}_{tileId.ToString()}",
-                    };
+                    LDtkSpriteRect newRect = CreateDefaultSpriteRect(srcRects[tileId].UnityRect, $"{_definition.Def.Identifier}_{tileId.ToString()}");
                     _sprites.Add(newRect);
                 }
                 changed = true;

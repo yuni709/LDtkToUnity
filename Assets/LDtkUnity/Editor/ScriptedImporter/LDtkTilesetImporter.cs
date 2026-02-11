@@ -30,9 +30,17 @@ namespace LDtkUnity.Editor
     {
         public const string PIXELS_PER_UNIT = nameof(_pixelsPerUnit);
         public const string OVERRIDE_TEXTURE = nameof(_overrideTexture);
+        public const string DEFAULT_SPRITE_ALIGNMENT = nameof(_defaultSpriteAlignment);
+        public const string DEFAULT_SPRITE_PIVOT = nameof(_defaultSpritePivot);
         
         [SerializeField] internal int _pixelsPerUnit = -1;
         [SerializeField] internal LazyLoadReference<Texture2D> _overrideTexture;
+        [SerializeField] internal SpriteAlignment _defaultSpriteAlignment = SpriteAlignment.Center;
+        [SerializeField] internal Vector2 _defaultSpritePivot = new Vector2(0.5f, 0.5f);
+        
+        // Cache the last-applied default so that only unchanged sprites migrate when defaults are edited.
+        [SerializeField] private SpriteAlignment _previousDefaultSpriteAlignment = SpriteAlignment.Center;
+        [SerializeField] private Vector2 _previousDefaultSpritePivot = new Vector2(0.5f, 0.5f);
 
         /// <summary>
         /// Holds onto all the standard grid-sized tiles. This serializes the sprite's changed settings between reimports, like pivot or physics shape.
@@ -236,15 +244,7 @@ namespace LDtkUnity.Editor
                 
                 scaledRect = LDtkCoordConverter.ImageSlice(scaledRect, _json.PxHei);
                 
-                LDtkSpriteRect newRect = new LDtkSpriteRect
-                {
-                    border = Vector4.zero,
-                    pivot = new Vector2(0.5f, 0.5f),
-                    alignment = SpriteAlignment.Center,
-                    rect = scaledRect,
-                    spriteID = GUID.Generate(),
-                    name = MakeAssetName()
-                };
+                LDtkSpriteRect newRect = CreateDefaultSpriteRect(scaledRect, MakeAssetName());
                 _additionalTiles.Add(newRect);
                 
                 string MakeAssetName()
@@ -264,6 +264,83 @@ namespace LDtkUnity.Editor
             }
             
             Debug.Assert(_additionalTiles.Count == additionalRects.Count);
+        }
+        
+        private LDtkSpriteRect CreateDefaultSpriteRect(Rect rect, string name)
+        {
+            return new LDtkSpriteRect
+            {
+                border = Vector4.zero,
+                pivot = GetConfiguredSpritePivot(),
+                alignment = _defaultSpriteAlignment,
+                rect = rect,
+                spriteID = GUID.Generate(),
+                name = name,
+            };
+        }
+
+        private bool ApplyDefaultSpriteSettingsToGeneratedSprites()
+        {
+            bool changed = false;
+
+            // Clamp to valid pivot range and persist it so settings are deterministic.
+            Vector2 clampedCurrentPivot = ClampPivot(_defaultSpritePivot);
+            if (!ArePivotsEqual(_defaultSpritePivot, clampedCurrentPivot))
+            {
+                _defaultSpritePivot = clampedCurrentPivot;
+                changed = true;
+            }
+
+            Vector2 previousPivot = GetPivotForAlignment(_previousDefaultSpriteAlignment, _previousDefaultSpritePivot);
+            Vector2 currentPivot = GetConfiguredSpritePivot();
+
+            bool settingsChanged = _previousDefaultSpriteAlignment != _defaultSpriteAlignment ||
+                                   !ArePivotsEqual(previousPivot, currentPivot);
+            if (!settingsChanged)
+            {
+                return changed;
+            }
+
+            // Only migrate sprites that still match the previous defaults.
+            foreach (LDtkSpriteRect sprite in _sprites)
+            {
+                if (sprite.alignment != _previousDefaultSpriteAlignment)
+                {
+                    continue;
+                }
+                if (!ArePivotsEqual(sprite.pivot, previousPivot))
+                {
+                    continue;
+                }
+
+                sprite.alignment = _defaultSpriteAlignment;
+                sprite.pivot = currentPivot;
+            }
+
+            _previousDefaultSpriteAlignment = _defaultSpriteAlignment;
+            _previousDefaultSpritePivot = clampedCurrentPivot;
+            return true;
+        }
+
+        private Vector2 GetConfiguredSpritePivot()
+        {
+            return GetPivotForAlignment(_defaultSpriteAlignment, _defaultSpritePivot);
+        }
+
+        private static Vector2 GetPivotForAlignment(SpriteAlignment alignment, Vector2 customPivot)
+        {
+            Vector2 clampedPivot = ClampPivot(customPivot);
+            return LDtkSpriteRect.GetPivotValue(alignment, clampedPivot);
+        }
+
+        private static Vector2 ClampPivot(Vector2 pivot)
+        {
+            return new Vector2(Mathf.Clamp01(pivot.x), Mathf.Clamp01(pivot.y));
+        }
+
+        private static bool ArePivotsEqual(Vector2 a, Vector2 b)
+        {
+            return Mathf.Approximately(a.x, b.x) && Mathf.Approximately(a.y, b.y);
         }
 
         
