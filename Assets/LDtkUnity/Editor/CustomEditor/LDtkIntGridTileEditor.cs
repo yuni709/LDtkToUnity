@@ -26,6 +26,16 @@ namespace LDtkUnity.Editor
             tooltip = "Optional.\n" +
                       "The GameObject spawned at this TileBase."
         };
+        private static readonly GUIContent GameObjectOffsetLabel = new GUIContent
+        {
+            text = "Prefab Offset",
+            tooltip = "Local position offset applied to the spawned prefab instance."
+        };
+        private static readonly GUIContent GameObjectRotationLabel = new GUIContent
+        {
+            text = "Prefab Rotation",
+            tooltip = "Local euler rotation offset applied to the spawned prefab instance."
+        };
         private static readonly GUIContent TagLabel = new GUIContent
         {
             text = "Tilemap Tag",
@@ -55,6 +65,8 @@ namespace LDtkUnity.Editor
         private SerializedProperty _propColliderType;
         private SerializedProperty _propCustomPhysicsSprite;
         private SerializedProperty _propGameObject;
+        private SerializedProperty _propGameObjectOffset;
+        private SerializedProperty _propGameObjectRotation;
 
         private void OnEnable()
         {
@@ -66,6 +78,8 @@ namespace LDtkUnity.Editor
             _propColliderType = serializedObject.FindProperty(LDtkIntGridTile.PROPERTY_COLLIDER_TYPE);
             _propCustomPhysicsSprite = serializedObject.FindProperty(LDtkIntGridTile.PROPERTY_CUSTOM_PHYSICS_SPRITE);
             _propGameObject = serializedObject.FindProperty(LDtkIntGridTile.PROPERTY_GAME_OBJECT);
+            _propGameObjectOffset = serializedObject.FindProperty(LDtkIntGridTile.PROPERTY_GAME_OBJECT_OFFSET);
+            _propGameObjectRotation = serializedObject.FindProperty(LDtkIntGridTile.PROPERTY_GAME_OBJECT_ROTATION);
         }
         private void OnDisable()
         {
@@ -112,6 +126,8 @@ namespace LDtkUnity.Editor
             LDtkEditorGUIUtility.DrawDivider();
 
             EditorGUILayout.PropertyField(_propGameObject, GameObjectLabel);
+            EditorGUILayout.PropertyField(_propGameObjectOffset, GameObjectOffsetLabel);
+            EditorGUILayout.PropertyField(_propGameObjectRotation, GameObjectRotationLabel);
             
             LDtkEditorGUIUtility.DenyPotentialResursiveGameObjects(_propGameObject);
             

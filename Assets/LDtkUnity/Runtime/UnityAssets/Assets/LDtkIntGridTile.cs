@@ -16,6 +16,8 @@ namespace LDtkUnity
         internal const string PROPERTY_LAYERMASK = nameof(_tilemapLayerMask);
         internal const string PROPERTY_PHYSICS_MATERIAL = nameof(_physicsMaterial);
         internal const string PROPERTY_GAME_OBJECT = nameof(_gameObject);
+        internal const string PROPERTY_GAME_OBJECT_OFFSET = nameof(_gameObjectOffset);
+        internal const string PROPERTY_GAME_OBJECT_ROTATION = nameof(_gameObjectRotation);
         
         /// <value>
         /// The collider type used on the tilemap.
@@ -46,6 +48,16 @@ namespace LDtkUnity
         /// The optional GameObject to be placed at the tile's position.
         /// </value>
         [SerializeField] protected GameObject _gameObject = null;
+        
+        /// <value>
+        /// Local position offset applied to the instantiated GameObject.
+        /// </value>
+        [SerializeField] protected Vector3 _gameObjectOffset = Vector3.zero;
+        
+        /// <value>
+        /// Local euler rotation offset applied to the instantiated GameObject.
+        /// </value>
+        [SerializeField] protected Vector3 _gameObjectRotation = Vector3.zero;
 
         internal string TilemapTag => _tilemapTag;
         internal int TilemapLayerMask => _tilemapLayerMask;
@@ -97,6 +109,20 @@ namespace LDtkUnity
             }
             
             go.name = _gameObject.name;
+
+            Tilemap concreteTilemap = tilemap.GetComponent<Tilemap>();
+            if (concreteTilemap != null)
+            {
+                go.transform.localPosition = concreteTilemap.GetCellCenterLocal(position) + _gameObjectOffset;
+            }
+            else
+            {
+                go.transform.localPosition += _gameObjectOffset;
+            }
+
+            Quaternion baseRotation = _gameObject.transform.localRotation;
+            Quaternion offsetRotation = Quaternion.Euler(_gameObjectRotation);
+            go.transform.localRotation = baseRotation * offsetRotation;
             return true;
         }
 
